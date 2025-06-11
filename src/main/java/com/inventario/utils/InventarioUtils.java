@@ -82,18 +82,27 @@ public class InventarioUtils {
     // Método para agregar un nuevo producto al inventario
     public static void agregarProducto(Scanner scanner, ArrayList<Producto> inventario) {
         System.out.println("Opción seleccionada: Agregar un producto");
-        System.out.println("Ingrese el nombre del producto:"); // Solicita el nombre del producto al usuario
-        String nombreProducto = scanner.nextLine(); // Lee el nombre del producto ingresado por el usuario
+        System.out.println("Ingrese el nombre del producto:"); // Solicita al usuario que ingrese el nombre del producto
+        String nombreProducto = scanner.nextLine().trim(); // Lee y elimina espacios al inicio y final
+        if (nombreProducto.isEmpty()) {
+            System.out.println("El nombre no puede estar vacío. Operación cancelada.");
+            System.out.println(" ");
+            return;
+        }
 
         System.out.println("Ingrese la cantidad del producto:");
-        int cantidad = leerEntero(scanner, "Cantidad no válida. Operación cancelada.");// Solicita la cantidad del producto al usuario
-        if (cantidad == Integer.MIN_VALUE)
-            return; // Si la cantidad no es válida, se cancela la operación (Integer.MIN_VALUE es un valor de error)
+        int cantidad = leerEntero(scanner, "Cantidad no válida. Operación cancelada.");
+        if (cantidad == Integer.MIN_VALUE || cantidad <= 0) {
+            System.out.println(" ");
+            return; // Si la cantidad no es válida o no es positiva, se cancela la operación
+        }
 
-        System.out.println("Ingrese el precio del producto:"); // Solicita el precio del producto al usuario
-        double precio = leerDouble(scanner, "Precio no válido. Operación cancelada."); // Lee el precio del producto ingresado por el usuario
-        if (precio == Double.MIN_VALUE)
-            return; // Si el precio no es válido, se cancela la operación (Double.MIN_VALUE es un valor de error)
+        System.out.println("Ingrese el precio del producto:");
+        double precio = leerDouble(scanner, "Precio no válido. Operación cancelada.");
+        if (precio == Double.MIN_VALUE || precio <= 0) {
+            System.out.println(" ");
+            return; // Si el precio no es válido o no es positivo, se cancela la operación
+        }
 
         Producto nuevo = new Producto(nombreProducto, cantidad, precio); // Crea un nuevo objeto Producto con los datos ingresados por el usuario
         inventario.add(nuevo); // Agrega el nuevo producto al inventario (ArrayList de productos)
@@ -105,66 +114,96 @@ public class InventarioUtils {
     public static void verInventario(ArrayList<Producto> inventario) {
         System.out.println("Opción seleccionada: Ver el inventario actual");
         if (inventario.isEmpty()) { // Verifica si el inventario está vacío
-            System.out.println("El inventario está vacío."); // Si está vacío, muestra un mensaje indicando que no hay productos
+            System.out.println(" -------- El inventario está vacío. -------- "); // Si está vacío, muestra un mensaje indicando que no hay productos
+            System.out.println("Por favor, agregue productos al inventario."); // Sugiere al usuario que agregue productos
+            System.out.println(" ");
         } else { // Si hay productos en el inventario, los muestra
+            System.out.println("-------- INVENTARIO ACTUAL --------");
             for (Producto p : inventario) { // Recorre cada producto en el inventario (ArrayList de productos)
                 // Muestra los detalles de cada producto
                 System.out.println("ID: " + p.getId() + " | Nombre: " + p.getNombreProducto() + " | Cantidad: " + p.getCantidadProducto() + " | Precio: " + p.getPrecioProducto());
             }
+            System.out.println("-----------------------------------");
         }
     }
 
     // Método para actualizar un producto existente en el inventario
     public static void actualizarProducto(Scanner scanner, ArrayList<Producto> inventario) {
         System.out.println("Opción seleccionada: Actualizar un producto");
-        System.out.println("Ingrese el ID del producto que desea actualizar:"); // Solicita el ID del producto al usuario
-        int id = leerEntero(scanner, "ID no válido. Operación cancelada."); // Lee el ID del producto ingresado por el usuario
-        if (id == Integer.MIN_VALUE)
-            return; // Si el ID no es válido, se cancela la operación (Integer.MIN_VALUE es un valor de error)
-
-        Producto producto = buscarProductoPorId(inventario, id); // Busca el producto en el inventario utilizando el ID proporcionado
-        if (producto == null) {
-            System.out.println("No se encontró un producto con el ID proporcionado."); // Si no se encuentra el producto, muestra un mensaje indicando que no existe
-            return; // Termina la operación si el producto no se encuentra
+        System.out.println("Ingrese el ID del producto que desea actualizar:");
+        int id = leerEntero(scanner, "ID no válido. Operación cancelada.");
+        if (id == Integer.MIN_VALUE) {
+            System.out.println(" ");
+            return;
         }
 
-        System.out.println("Producto encontrado:");  // Si se encuentra el producto, muestra sus detalles
+        Producto producto = buscarProductoPorId(inventario, id);
+        if (producto == null) {
+            System.out.println("No se encontró un producto con el ID proporcionado.");
+            System.out.println("-------- -------- --------");
+            System.out.println(" ");
+            return;
+        }
+
+        System.out.println("--------Producto encontrado: --------");
         mostrarProducto(producto);
 
-        System.out.println("Ingrese el nuevo nombre del producto:"); // Solicita el nuevo nombre del producto al usuario
-        String nuevoNombre = scanner.nextLine(); // Lee el nuevo nombre del producto ingresado por el usuario
+        System.out.println("Ingrese el nuevo nombre del producto:");
+        String nuevoNombre = scanner.nextLine().trim();
+        if (nuevoNombre.isEmpty()) {
+            System.out.println("El nombre no puede estar vacío o solo contener espacios. Operación cancelada.");
+            System.out.println(" ");
+            return;
+        }
 
-        System.out.println("Ingrese la nueva cantidad del producto:"); // Solicita la nueva cantidad del producto al usuario
-        int nuevaCantidad = leerEntero(scanner, "Cantidad no válida. Operación cancelada."); // Lee la nueva cantidad del producto ingresada por el usuario
-        if (nuevaCantidad == Integer.MIN_VALUE)
-            return; // Si la nueva cantidad no es válida, se cancela la operación (Integer.MIN_VALUE es un valor de error)
+        System.out.println("Ingrese la nueva cantidad del producto:");
+        int nuevaCantidad = leerEntero(scanner, "-------- Cantidad no válida. Operación cancelada. --------");
+        if (nuevaCantidad == Integer.MIN_VALUE) {
+            System.out.println(" ");
+            return;
+        }
+        if (nuevaCantidad <= 0) {
+            System.out.println("La cantidad debe ser un número positivo mayor que cero. Operación cancelada.");
+            System.out.println(" ");
+            return;
+        }
 
-        System.out.println("Ingrese el nuevo precio del producto:"); // Solicita el nuevo precio del producto al usuario
-        double nuevoPrecio = leerDouble(scanner, "Precio no válido. Operación cancelada."); // Lee el nuevo precio del producto ingresado por el usuario
-        if (nuevoPrecio == Double.MIN_VALUE)
-            return; // Si el nuevo precio no es válido, se cancela la operación (Double.MIN_VALUE es un valor de error)
+        System.out.println("Ingrese el nuevo precio del producto:");
+        double nuevoPrecio = leerDouble(scanner, " -------- Precio no válido. Operación cancelada. --------");
+        if (nuevoPrecio == Double.MIN_VALUE) {
+            System.out.println(" ");
+            return;
+        }
+        if (nuevoPrecio <= 0) {
+            System.out.println("El precio debe ser un número positivo mayor que cero. Operación cancelada.");
+            System.out.println(" ");
+            return;
+        }
 
-        producto.setNombreProducto(nuevoNombre); // Actualiza el nombre del producto con el nuevo nombre ingresado por el usuario
-        producto.setCantidadProducto(nuevaCantidad); // Actualiza la cantidad del producto con la nueva cantidad ingresada por el usuario
-        producto.setPrecioProducto(nuevoPrecio); // Actualiza el precio del producto con el nuevo precio ingresado por el usuario
-        System.out.println("Producto actualizado con éxito.");
-        mostrarProducto(producto); // Muestra los detalles del producto actualizado
+        producto.setNombreProducto(nuevoNombre);
+        producto.setCantidadProducto(nuevaCantidad);
+        producto.setPrecioProducto(nuevoPrecio);
+        System.out.println(" -------- Producto actualizado con éxito. -------- ");
+        mostrarProducto(producto);
     }
 
     // Método para eliminar un producto del inventario
     public static void eliminarProducto(Scanner scanner, ArrayList<Producto> inventario) {
         System.out.println("Opción seleccionada: Eliminar un producto");
         System.out.println("Ingrese el ID del producto que desea eliminar:"); // Solicita el ID del producto al usuario
-        int id = leerEntero(scanner, "ID no válido. Operación cancelada."); // Lee el ID del producto ingresado por el usuario
-        if (id == Integer.MIN_VALUE)
-            return; // Si el ID no es válido, se cancela la operación (Integer.MIN_VALUE es un valor de error)
+        int id = leerEntero(scanner, " -------- ID no válido. Operación cancelada. -------- ");
+        if (id == Integer.MIN_VALUE) {
+            System.out.println(" ");
+            return;
+        }
 
-        Producto producto = buscarProductoPorId(inventario, id); // Busca el producto en el inventario utilizando el ID proporcionado
-        if (producto == null) { // Si no se encuentra el producto, muestra un mensaje indicando que no existe
-            System.out.println("No se encontró un producto con el ID proporcionado.");
-        } else { // Si se encuentra el producto, lo elimina del inventario
-            inventario.remove(producto); // Se elimina el producto del inventario ocupand el método remove de ArrayList
-            System.out.println("Producto eliminado exitosamente."); // Muestra un mensaje indicando que el producto se ha eliminado correctamente
+        Producto producto = buscarProductoPorId(inventario, id);
+        if (producto == null) {
+            System.out.println(" -------- No se encontró un producto con el ID proporcionado. -------- ");
+            System.out.println(" ");
+        } else {
+            inventario.remove(producto);
+            System.out.println(" -------- Producto eliminado exitosamente. -------- ");
         }
     }
 }
